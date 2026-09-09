@@ -1,0 +1,77 @@
+### Storefront API — IntelliJ HTTP Client / VS Code REST Client scratchpad
+### Run "login (demo)" first; {{demoToken}} / {{adminToken}} are captured from the response.
+
+@host = http://localhost:8080
+
+### login (demo) -> customer token
+# @name loginDemo
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "demo@storefront.test", "password": "demo12345" }
+
+> {% client.global.set("demoToken", response.body.accessToken); %}
+
+### login (admin) -> admin token
+# @name loginAdmin
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@storefront.test", "password": "admin12345" }
+
+> {% client.global.set("adminToken", response.body.accessToken); %}
+
+### register a brand-new account
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{ "email": "newbuyer@example.com", "password": "password123", "fullName": "New Buyer" }
+
+### browse catalogue (public)
+GET {{host}}/api/catalog/products
+
+### browse one category
+GET {{host}}/api/catalog/products?category=electronics
+
+### categories
+GET {{host}}/api/catalog/categories
+
+### create a product (ADMIN only -> 403 with demo token)
+POST {{host}}/api/catalog/products
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "sku": "BK-9001", "name": "The Rust Book", "description": "Systems programming.",
+  "priceCents": 3200, "currency": "USD", "categorySlug": "books", "stockQuantity": 25 }
+
+### place an order — happy path -> CONFIRMED after a moment
+# @name placeOrder
+POST {{host}}/api/orders
+Authorization: Bearer {{demoToken}}
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 2 } ] }
+
+> {% client.global.set("orderRef", response.body.orderRef); %}
+
+### poll the order
+GET {{host}}/api/orders/{{orderRef}}
+Authorization: Bearer {{demoToken}}
+
+### list my orders
+GET {{host}}/api/orders
+Authorization: Bearer {{demoToken}}
+
+### rejection path — quantity above stock -> REJECTED (Out of stock: ...)
+POST {{host}}/api/orders
+Authorization: Bearer {{demoToken}}
+Content-Type: application/json
+
+{ "items": [ { "productId": 1, "quantity": 99999 } ] }
+
+### payment-limit path — total >= $10,000 -> REJECTED (Payment declined: amount too large)
+POST {{host}}/api/orders
+Authorization: Bearer {{demoToken}}
+Content-Type: application/json
+
+{ "items": [ { "productId": 3, "quantity": 95 } ] }

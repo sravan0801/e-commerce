@@ -1,0 +1,20 @@
+# Connection details are injected by Testcontainers @ServiceConnection.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    secret: test-secret-value-that-is-definitely-long-enough-000000
+    issuer: storefront
+    access-token-ttl: PT24H
+  seed:
+    enabled: false
+
+logging:
+  level:
+    com.example.storefront: INFO
+    org.apache.kafka: ERROR

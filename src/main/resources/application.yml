@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: storefront
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/storefront}
+    username: ${SPRING_DATASOURCE_USERNAME:storefront}
+    password: ${SPRING_DATASOURCE_PASSWORD:storefront}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate          # schema is owned by Flyway, never by Hibernate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: storefront
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.example.storefront.event"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:dev-only-secret-change-me-please-at-least-32-bytes-long-000}
+    issuer: storefront
+    access-token-ttl: PT24H
+  seed:
+    enabled: ${APP_SEED_ENABLED:false}
+
+logging:
+  level:
+    com.example.storefront: DEBUG
+    org.apache.kafka: WARN

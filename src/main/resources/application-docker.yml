@@ -1,0 +1,6 @@
+# Activated by SPRING_PROFILES_ACTIVE=docker (see docker-compose.yml).
+# All connection details arrive as environment variables; this file only
+# tweaks logging so container output stays readable.
+logging:
+  level:
+    com.example.storefront: INFO
